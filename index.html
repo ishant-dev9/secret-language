@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Language Decoder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tabs button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-weight: 500;
+        }
+
+        .tabs button.active {
+            background: #00f7ff;
+            color: #000;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            border-radius: 12px;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+        }
+
+        .action-btn {
+            margin-top: 12px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            background: linear-gradient(135deg, #00f7ff, #00c6ff);
+        }
+
+        .output {
+            margin-top: 15px;
+            font-size: 13px;
+            word-break: break-all;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app">
+        <h1>🔐 Language Decoder</h1>
+
+        <div class="tabs">
+            <button id="encodeTab" class="active" onclick="switchMode('encode')">Converter</button>
+            <button id="decodeTab" onclick="switchMode('decode')">Debugger</button>
+        </div>
+
+        <textarea id="input" placeholder="Write your message here..."></textarea>
+
+        <button class="action-btn" onclick="process()">Run</button>
+
+        <div class="output" id="output">Result will appear here...</div>
+    </div>
+
+    <script>
+        let mode = "encode";
+
+        // Switch UI mode
+        function switchMode(selected) {
+            mode = selected;
+            document.getElementById("encodeTab").classList.remove("active");
+            document.getElementById("decodeTab").classList.remove("active");
+
+            if (selected === "encode") {
+                document.getElementById("encodeTab").classList.add("active");
+                document.getElementById("input").placeholder = "Write normal text to convert...";
+            } else {
+                document.getElementById("decodeTab").classList.add("active");
+                document.getElementById("input").placeholder = "Paste coded pattern to debug...";
+            }
+
+            document.getElementById("output").innerText = "Result will appear here...";
+            document.getElementById("input").value = "";
+        }
+
+        // Encode logic
+        function encode(text) {
+            let result = [];
+            for (let i = 0; i < text.length; i++) {
+                let code = text.charCodeAt(i) + 10 + i;
+                result.push("∆" + code);
+            }
+            return result.join("|");
+        }
+
+        // Decode logic
+        function decode(codeText) {
+            let parts = codeText.split("|");
+            let result = "";
+
+            for (let i = 0; i < parts.length; i++) {
+                let num = parseInt(parts[i].replace("∆", ""));
+                let original = num - 10 - i;
+                result += String.fromCharCode(original);
+            }
+            return result;
+        }
+
+        // Run encoder / decoder
+        function process() {
+            const input = document.getElementById("input").value.trim();
+            if (!input) return;
+
+            if (mode === "encode") {
+                document.getElementById("output").innerText = encode(input);
+            } else {
+                document.getElementById("output").innerText = decode(input);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
