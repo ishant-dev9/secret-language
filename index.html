@@ -7,15 +7,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-        body {
+        * {
+            box-sizing: border-box;
             font-family: "Poppins", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            color: #fff;
         }
 
         .app {
@@ -24,12 +28,13 @@
             background: rgba(255, 255, 255, 0.08);
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
             backdrop-filter: blur(12px);
         }
 
         h1 {
             text-align: center;
+            margin-top: 0;
             margin-bottom: 15px;
         }
 
@@ -57,7 +62,7 @@
 
         textarea {
             width: 100%;
-            height: 100px;
+            height: 110px;
             border-radius: 12px;
             border: none;
             padding: 12px;
@@ -76,15 +81,47 @@
             font-weight: bold;
             cursor: pointer;
             background: linear-gradient(135deg, #00f7ff, #00c6ff);
+            color: #000;
+        }
+
+        .output-box {
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .output-header span {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .copy-btn {
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .copy-btn.copied {
+            background: #00f7ff;
+            color: #000;
         }
 
         .output {
-            margin-top: 15px;
             font-size: 13px;
             word-break: break-all;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 10px;
+            min-height: 40px;
         }
     </style>
 </head>
@@ -99,19 +136,26 @@
             <button id="decodeTab" onclick="switchMode('decode')">Debugger</button>
         </div>
 
-        <textarea id="input" placeholder="Write your message here..."></textarea>
+        <textarea id="input" placeholder="Write normal text to convert..."></textarea>
 
         <button class="action-btn" onclick="process()">Run</button>
 
-        <div class="output" id="output">Result will appear here...</div>
+        <div class="output-box">
+            <div class="output-header">
+                <span>Output</span>
+                <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy</button>
+            </div>
+            <div class="output" id="output">Result will appear here...</div>
+        </div>
     </div>
 
     <script>
         let mode = "encode";
 
-        // Switch UI mode
+        // Switch mode
         function switchMode(selected) {
             mode = selected;
+
             document.getElementById("encodeTab").classList.remove("active");
             document.getElementById("decodeTab").classList.remove("active");
 
@@ -123,43 +167,64 @@
                 document.getElementById("input").placeholder = "Paste coded pattern to debug...";
             }
 
-            document.getElementById("output").innerText = "Result will appear here...";
             document.getElementById("input").value = "";
+            document.getElementById("output").innerText = "Result will appear here...";
+            resetCopyButton();
         }
 
-        // Encode logic
+        // Encode
         function encode(text) {
-            let result = [];
+            let out = [];
             for (let i = 0; i < text.length; i++) {
-                let code = text.charCodeAt(i) + 10 + i;
-                result.push("∆" + code);
+                let value = text.charCodeAt(i) + 10 + i;
+                out.push("∆" + value);
             }
-            return result.join("|");
+            return out.join("|");
         }
 
-        // Decode logic
-        function decode(codeText) {
-            let parts = codeText.split("|");
-            let result = "";
+        // Decode
+        function decode(code) {
+            let parts = code.split("|");
+            let text = "";
 
             for (let i = 0; i < parts.length; i++) {
                 let num = parseInt(parts[i].replace("∆", ""));
                 let original = num - 10 - i;
-                result += String.fromCharCode(original);
+                text += String.fromCharCode(original);
             }
-            return result;
+            return text;
         }
 
-        // Run encoder / decoder
+        // Run
         function process() {
             const input = document.getElementById("input").value.trim();
             if (!input) return;
 
-            if (mode === "encode") {
-                document.getElementById("output").innerText = encode(input);
-            } else {
-                document.getElementById("output").innerText = decode(input);
-            }
+            let result = mode === "encode" ? encode(input) : decode(input);
+            document.getElementById("output").innerText = result;
+            resetCopyButton();
+        }
+
+        // Copy output
+        function copyOutput() {
+            const text = document.getElementById("output").innerText;
+            if (!text || text === "Result will appear here...") return;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById("copyBtn");
+                btn.innerText = "Copied!";
+                btn.classList.add("copied");
+
+                setTimeout(() => {
+                    resetCopyButton();
+                }, 1500);
+            });
+        }
+
+        function resetCopyButton() {
+            const btn = document.getElementById("copyBtn");
+            btn.innerText = "Copy";
+            btn.classList.remove("copied");
         }
     </script>
 
